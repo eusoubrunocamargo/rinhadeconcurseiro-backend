@@ -6,11 +6,10 @@ import br.com.rinhadeconcurseiro.exception.ResourceNotFoundException;
 import br.com.rinhadeconcurseiro.mapper.QuestaoMapper;
 import br.com.rinhadeconcurseiro.repository.QuestaoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,19 +28,19 @@ public class QuestaoService {
     }
 
     @Transactional(readOnly = true)
-    public List<QuestaoResponse> listarPorMateria(Long materiaId) {
+    public Page<QuestaoResponse> listarQuestoes(Long materiaId, Long assuntoId, Pageable pageable) {
+        Page<Questao> questaoPage;
 
-        return questaoRepository.findByMateriaIdAndAtivoTrue(materiaId).stream()
-                .map(questaoMapper::toResponse)
-                .collect(Collectors.toList());
-    }
+        if (materiaId != null) {
+            questaoPage = questaoRepository.findByAssunto_Materia_IdAndAtivoTrue(materiaId, pageable);
+        } else if (assuntoId != null) {
+            questaoPage = questaoRepository.findByAssunto_IdAndAtivoTrue(assuntoId, pageable);
+        } else {
+            // If no filter is provided, return a paginated list of all active questions.
+            questaoPage = questaoRepository.findAllByAtivoTrue(pageable);
+        }
 
-    @Transactional(readOnly = true)
-    public List<QuestaoResponse> listarPorAssunto(Long assuntoId) {
-
-        return questaoRepository.findByAssuntoId(assuntoId).stream()
-                .map(questaoMapper::toResponse)
-                .collect(Collectors.toList());
+        return questaoPage.map(questaoMapper::toResponse);
     }
 
     @Transactional(readOnly = true)

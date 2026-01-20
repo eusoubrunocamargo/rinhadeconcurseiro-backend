@@ -1,6 +1,8 @@
 package br.com.rinhadeconcurseiro.repository;
 
 import br.com.rinhadeconcurseiro.entity.Questao;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,11 +19,11 @@ public interface QuestaoRepository
 
     boolean existsByIdTec(String idTec);
 
-    List<Questao> findByMateriaId(Long materiaId);
+    Page<Questao> findByAssunto_Materia_IdAndAtivoTrue(Long materiaId, Pageable pageable);
 
-    List<Questao> findByMateriaIdAndAtivoTrue(Long materiaId);
+    Page<Questao> findByAssunto_IdAndAtivoTrue(Long assuntoId, Pageable pageable);
 
-    List<Questao> findByAssuntoId(Long assuntoId);
+    Page<Questao> findAllByAtivoTrue(Pageable pageable);
 
     @Query("SELECT COUNT(q) FROM Questao q WHERE q.materia.id = :materiaId AND q.ativo = true")
     Long countByMateriaIdAndAtivoTrue(@Param("materiaId") Long materiaId);
@@ -29,4 +31,5 @@ public interface QuestaoRepository
     @Query("SELECT COUNT(q) FROM Questao q WHERE q.assunto.id = :assuntoId AND q.ativo = true")
     Long countByAssuntoIdAndAtivoTrue(@Param("assuntoId") Long assuntoId);
 
+    List<Questao> findByMateriaId(Long id);
 }
